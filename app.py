@@ -8,7 +8,8 @@ from PIL import Image
 import tempfile
 
 # Google Drive model download setup
-MODEL_PATH = "model.h5"
+MODEL_PATH = "model.keras"
+
 FILE_ID = "1CzG9lrRAHHZ0wNjr2lhLovKhSh7mJ3Pp"  # Replace with your real file ID
 
 @st.cache_resource
