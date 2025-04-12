@@ -9,7 +9,7 @@ import tempfile
 
 # Google Drive model download setup
 MODEL_PATH = "model.h5"
-FILE_ID = "1ABCdEfGhIJKlmnOpQRstUVWXYZ"  # Replace with your real file ID
+FILE_ID = "1CzG9lrRAHHZ0wNjr2lhLovKhSh7mJ3Pp"  # Replace with your real file ID
 
 @st.cache_resource
 def download_and_load_model():
