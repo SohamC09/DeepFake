@@ -1,101 +1,67 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "1CzG9lrRAHHZ0wNjr2lhLovKhSh7mJ3Pp",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "import streamlit as st\n",
-    "import tensorflow as tf\n",
-    "import numpy as np\n",
-    "import gdown\n",
-    "import os\n",
-    "import cv2\n",
-    "from PIL import Image\n",
-    "import tempfile\n",
-    "\n",
-    "# Google Drive model download setup\n",
-    "MODEL_PATH = \"model.h5\"\n",
-    "FILE_ID = \"1ABCdEfGhIJKlmnOpQRstUVWXYZ\"  # Replace with your real file ID\n",
-    "\n",
-    "@st.cache_resource\n",
-    "def download_and_load_model():\n",
-    "    if not os.path.exists(MODEL_PATH):\n",
-    "        url = f\"https://drive.google.com/uc?id={FILE_ID}\"\n",
-    "        gdown.download(url, MODEL_PATH, quiet=False)\n",
-    "    model = tf.keras.models.load_model(MODEL_PATH)\n",
-    "    return model\n",
-    "\n",
-    "model = download_and_load_model()\n",
-    "\n",
-    "st.title(\"Image & Video Classification App 📷🎥\")\n",
-    "\n",
-    "uploaded_file = st.file_uploader(\"Upload an image or a video file\", type=[\"jpg\", \"jpeg\", \"png\", \"mp4\", \"avi\", \"mov\"])\n",
-    "\n",
-    "def preprocess_image(image):\n",
-    "    image = image.resize((224, 224))  # or the input size your model expects\n",
-    "    img_array = np.array(image) / 255.0\n",
-    "    if len(img_array.shape) == 2:  # grayscale\n",
-    "        img_array = np.stack((img_array,) * 3, axis=-1)\n",
-    "    img_array = np.expand_dims(img_array, axis=0)\n",
-    "    return img_array\n",
-    "\n",
-    "if uploaded_file is not None:\n",
-    "    file_type = uploaded_file.type\n",
-    "\n",
-    "    if \"image\" in file_type:\n",
-    "        image = Image.open(uploaded_file)\n",
-    "        st.image(image, caption=\"Uploaded Image\", use_column_width=True)\n",
-    "        input_data = preprocess_image(image)\n",
-    "        prediction = model.predict(input_data)[0]\n",
-    "        pred_class = np.argmax(prediction)\n",
-    "        confidence = np.max(prediction)\n",
-    "        st.success(f\"Predicted Class: {pred_class} (Confidence: {confidence:.2f})\")\n",
-    "\n",
-    "    elif \"video\" in file_type:\n",
-    "        # Save video temporarily\n",
-    "        tfile = tempfile.NamedTemporaryFile(delete=False)\n",
-    "        tfile.write(uploaded_file.read())\n",
-    "\n",
-    "        cap = cv2.VideoCapture(tfile.name)\n",
-    "        success, frame = cap.read()\n",
-    "        if success:\n",
-    "            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)\n",
-    "            image = Image.fromarray(frame_rgb)\n",
-    "            st.image(image, caption=\"Extracted Frame from Video\", use_column_width=True)\n",
-    "            input_data = preprocess_image(image)\n",
-    "            prediction = model.predict(input_data)[0]\n",
-    "            pred_class = np.argmax(prediction)\n",
-    "            confidence = np.max(prediction)\n",
-    "            st.success(f\"Predicted Class: {pred_class} (Confidence: {confidence:.2f})\")\n",
-    "        else:\n",
-    "            st.error(\"Could not read frame from video.\")\n",
-    "\n",
-    "        cap.release()\n"
-   ]
-  }
- ],
- "metadata": {
-  "kernelspec": {
-   "display_name": "Python 3 (ipykernel)",
-   "language": "python",
-   "name": "python3"
-  },
-  "language_info": {
-   "codemirror_mode": {
-    "name": "ipython",
-    "version": 3
-   },
-   "file_extension": ".py",
-   "mimetype": "text/x-python",
-   "name": "python",
-   "nbconvert_exporter": "python",
-   "pygments_lexer": "ipython3",
-   "version": "3.8.10"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 5
-}
+import streamlit as st
+import tensorflow as tf
+import numpy as np
+import gdown
+import os
+import cv2
+from PIL import Image
+import tempfile
+
+# Google Drive model download setup
+MODEL_PATH = "model.h5"
+FILE_ID = "1ABCdEfGhIJKlmnOpQRstUVWXYZ"  # Replace with your real file ID
+
+@st.cache_resource
+def download_and_load_model():
+    if not os.path.exists(MODEL_PATH):
+        url = f"https://drive.google.com/uc?id={FILE_ID}"
+        gdown.download(url, MODEL_PATH, quiet=False)
+    model = tf.keras.models.load_model(MODEL_PATH)
+    return model
+
+model = download_and_load_model()
+
+st.title("Image & Video Classification App 📷🎥")
+
+uploaded_file = st.file_uploader("Upload an image or a video file", type=["jpg", "jpeg", "png", "mp4", "avi", "mov"])
+
+def preprocess_image(image):
+    image = image.resize((224, 224))  # or the input size your model expects
+    img_array = np.array(image) / 255.0
+    if len(img_array.shape) == 2:  # grayscale
+        img_array = np.stack((img_array,) * 3, axis=-1)
+    img_array = np.expand_dims(img_array, axis=0)
+    return img_array
+
+if uploaded_file is not None:
+    file_type = uploaded_file.type
+
+    if "image" in file_type:
+        image = Image.open(uploaded_file)
+        st.image(image, caption="Uploaded Image", use_column_width=True)
+        input_data = preprocess_image(image)
+        prediction = model.predict(input_data)[0]
+        pred_class = np.argmax(prediction)
+        confidence = np.max(prediction)
+        st.success(f"Predicted Class: {pred_class} (Confidence: {confidence:.2f})")
+
+    elif "video" in file_type:
+        # Save video temporarily
+        tfile = tempfile.NamedTemporaryFile(delete=False)
+        tfile.write(uploaded_file.read())
+
+        cap = cv2.VideoCapture(tfile.name)
+        success, frame = cap.read()
+        if success:
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            image = Image.fromarray(frame_rgb)
+            st.image(image, caption="Extracted Frame from Video", use_column_width=True)
+            input_data = preprocess_image(image)
+            prediction = model.predict(input_data)[0]
+            pred_class = np.argmax(prediction)
+            confidence = np.max(prediction)
+            st.success(f"Predicted Class: {pred_class} (Confidence: {confidence:.2f})")
+        else:
+            st.error("Could not read frame from video.")
+
+        cap.release()
